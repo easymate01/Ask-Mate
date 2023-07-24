@@ -1,4 +1,6 @@
+using AskMate.Models.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Npgsql;
 
 namespace AskMate.Controllers;
 
@@ -6,9 +8,12 @@ namespace AskMate.Controllers;
 [Route("[controller]")]
 public class QuestionController : ControllerBase
 {
+
+    private readonly string _connectionString = "Server=localhost;Port=5432;User Id=postgres;Password=1234;Database=AskMate";
     [HttpGet]
     public IActionResult GetAll()
     {
-        return Ok("No questions were asked yet.");
+        var repository = new QuestionsRepository(new NpgsqlConnection(_connectionString));
+        return Ok(repository.GetAll());
     }
 }
