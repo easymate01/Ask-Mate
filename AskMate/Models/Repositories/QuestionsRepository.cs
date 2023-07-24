@@ -100,6 +100,39 @@ namespace AskMate.Models.Repositories
             }
         }
 
+        public int Create(Question question)
+        {
+            _connection.Open();
+            int lastInsertId;
+
+            using (var cmd = new NpgsqlCommand(
+                       "INSERT INTO questions (title, description) VALUES (@title, @description) RETURNING id",
+                       _connection
+                   ))
+            {
+                cmd.Parameters.AddWithValue("title", question.Title);
+                cmd.Parameters.AddWithValue("description", question.Description);
+
+                lastInsertId = (int)cmd.ExecuteScalar();
+            }
+
+            _connection.Close();
+
+            return lastInsertId;
+        }
+
+        public void Delete(int id)
+        {
+            _connection.Open();
+            var adapter = new NpgsqlDataAdapter(
+                "DELETE FROM questions WHERE id = :id",
+                _connection
+            );
+            adapter.SelectCommand?.Parameters.AddWithValue(":id", id);
+
+            adapter.SelectCommand?.ExecuteNonQuery();
+            _connection.Close();
+        }
 
     }
 }

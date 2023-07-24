@@ -1,3 +1,4 @@
+using AskMate.Models;
 using AskMate.Models.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
@@ -23,5 +24,30 @@ public class QuestionController : ControllerBase
         var repository = new QuestionsRepository(new NpgsqlConnection(_connectionString));
 
         return Ok(repository.GetById(id));
+    }
+
+    [HttpPost("/Question")]
+    public IActionResult Create(Question question)
+    {
+        var repository = new QuestionsRepository(new NpgsqlConnection(_connectionString));
+
+        return Ok(repository.Create(question));
+    }
+
+    [HttpPost("/Answer")]
+    public IActionResult Addanswer(Answer answer)
+    {
+        var repository = new AnswersRepository(new NpgsqlConnection(_connectionString));
+
+        return Ok(repository.AddAnswer(answer));
+    }
+
+    [HttpDelete("{id}")]
+    public IActionResult Delete(int id)
+    {
+        var repository = new QuestionsRepository(new NpgsqlConnection(_connectionString));
+        repository.Delete(id);
+
+        return Ok("The Question has been deleted");
     }
 }
