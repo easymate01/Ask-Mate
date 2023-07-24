@@ -33,5 +33,18 @@ namespace AskMate.Models.Repositories
 
             return newAnswerId;
         }
+
+        public void Delete(int id)
+        {
+            _connection.Open();
+            var adapter = new NpgsqlDataAdapter(
+                "DELETE FROM answears WHERE id = :id",
+                _connection
+            );
+            adapter.SelectCommand?.Parameters.AddWithValue(":id", id);
+
+            adapter.SelectCommand?.ExecuteNonQuery();
+            _connection.Close();
+        }
     }
 }

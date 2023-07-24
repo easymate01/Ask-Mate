@@ -7,7 +7,7 @@ namespace AskMate.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class QuestionController : ControllerBase
+public class Controller : ControllerBase
 {
 
     private readonly string _connectionString = "Server=localhost;Port=5432;User Id=postgres;Password=1234;Database=AskMate";
@@ -42,12 +42,38 @@ public class QuestionController : ControllerBase
         return Ok(repository.AddAnswer(answer));
     }
 
-    [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    [HttpDelete("/Question/{id}")]
+    public IActionResult DeleteQuestion(int id)
     {
         var repository = new QuestionsRepository(new NpgsqlConnection(_connectionString));
         repository.Delete(id);
 
         return Ok("The Question has been deleted");
     }
+    [HttpDelete("/Answer/{id}")]
+    public IActionResult DeleteAnswear(int id)
+    {
+        var repository = new AnswersRepository(new NpgsqlConnection(_connectionString));
+        repository.Delete(id);
+
+        return Ok("The Answear has been deleted");
+    }
+
+
+    [HttpPost("/User")]
+    public IActionResult CreateUser(User user)
+    {
+        var repository = new UsersRepository(new NpgsqlConnection(_connectionString));
+
+        return Ok(repository.CreateUser(user));
+    }
+
+    [HttpPost("Login")]
+    public IActionResult Login([FromBody] User user)
+    {
+        var repository = new UsersRepository(new NpgsqlConnection(_connectionString));
+
+        return Ok(repository.Login(user.UserName, user.Password));
+    }
+
 }

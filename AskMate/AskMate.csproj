@@ -7,6 +7,16 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Controllers\QuestionController.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Controllers\Controller" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="IdentityModel" Version="6.1.0" />
+        <PackageReference Include="JWT" Version="10.0.3" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.5" />
         <PackageReference Include="Npgsql" Version="7.0.4" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
