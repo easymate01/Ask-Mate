@@ -134,5 +134,75 @@ namespace AskMate.Models.Repositories
             _connection.Close();
         }
 
+        // SEARCH
+        public List<Question> Search(string searchPhrase)
+        {
+            try
+            {
+                _connection.Open();
+
+                var adapter = new NpgsqlDataAdapter(
+                    "SELECT q.id, q.title, q.description, q.submission_time, a.id AS answer_id, a.message AS answer_message " +
+                    "FROM questions AS q " +
+                    "LEFT JOIN answers AS a ON q.id = a.question_id " +
+                    "WHERE q.title ILIKE '%' || :searchPhrase || '%' OR " +
+                    "q.description ILIKE '%' || :searchPhrase || '%' OR " +
+                    "a.message ILIKE '%' || :searchPhrase || '%'",
+                    _connection
+                );
+
+                adapter.SelectCommand?.Parameters.AddWithValue(":searchPhrase", searchPhrase);
+
+                var dataSet = new DataSet();
+                adapter.Fill(dataSet);
+                var table = dataSet.Tables[0];
+
+                var questions = new List<Question>();
+
+                foreach (DataRow row in table.Rows)
+                {
+                    var questionId = (int)row["id"];
+                    var question = questions.FirstOrDefault(q => q.Id == questionId);
+
+                    if (question == null)
+                    {
+                        question = new Question
+                        {
+                            Id = questionId,
+                            Title = (string)row["title"],
+                            Description = (string)row["description"],
+                            PublishedDate = (DateTime)row["submission_time"],
+                            Answers = new List<Answer>()
+                        };
+
+                        questions.Add(question);
+                    }
+
+                    if (!DBNull.Value.Equals(row["answer_id"]))
+                    {
+                        question.Answers.Add(new Answer
+                        {
+                            Id = (int)row["answer_id"],
+                            Message = (string)row["answer_message"],
+                            Question_Id = questionId,
+                            PublishedDate = (DateTime)row["submission_time"]
+                        });
+                    }
+                }
+
+                return questions;
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception, log it, and return an appropriate response.
+                // For simplicity, let's rethrow the exception here.
+                throw;
+            }
+            finally
+            {
+                _connection.Close();
+            }
+        }
+
     }
 }

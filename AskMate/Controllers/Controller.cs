@@ -13,7 +13,7 @@ public class Controller : ControllerBase
     private readonly string _connectionString = "Server=localhost;Port=5432;User Id=postgres;Password=1234;Database=AskMate";
     //private readonly string _connectionString = "Server=localhost;Port=5432;User Id=postgres;Password=12345;Database=AskMate";
 
-    [HttpGet]
+    [HttpGet("/Question")]
     public IActionResult GetAll()
     {
         var repository = new QuestionsRepository(new NpgsqlConnection(_connectionString));
@@ -90,5 +90,14 @@ public class Controller : ControllerBase
 
         return Ok("Logged out successfully.");
     }
+
+    [HttpGet("/Search/{searchPhrase}")]
+    public IActionResult Search(string searchPhrase)
+    {
+        var repository = new QuestionsRepository(new NpgsqlConnection(_connectionString));
+        var result = repository.Search(searchPhrase);
+        return Ok(result);
+    }
+
 
 }
