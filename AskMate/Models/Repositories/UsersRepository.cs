@@ -48,34 +48,57 @@ namespace AskMate.Models.Repositories
             var query = "SELECT id, username, email, password FROM users " +
                         "WHERE username = @usernameOrEmail OR email = @usernameOrEmail";
 
-                _connection.Open();
+            _connection.Open();
 
-                using (var command = new NpgsqlCommand(query, _connection))
+            using (var command = new NpgsqlCommand(query, _connection))
+            {
+                command.Parameters.AddWithValue("usernameOrEmail", usernameOrEmail);
+
+                using (var reader = command.ExecuteReader())
                 {
-                    command.Parameters.AddWithValue("usernameOrEmail", usernameOrEmail);
-
-                    using (var reader = command.ExecuteReader())
+                    if (reader.Read())
                     {
-                        if (reader.Read())
-                        {
-                            var userId = (int)reader["id"];
-                            var username = (string)reader["username"];
-                            var email = (string)reader["email"];
-                            var passwordHash = (string)reader["password"];
+                        var userId = (int)reader["id"];
+                        var username = (string)reader["username"];
+                        var email = (string)reader["email"];
+                        var passwordHash = (string)reader["password"];
 
-                            // Validate the password
-                                user = new User
-                                {
-                                    Id = userId,
-                                    UserName = username,
-                                    Email = email
-                                };
-                        }
+                        user = new User
+                        {
+                            Id = userId,
+                            UserName = username,
+                            Email = email
+                        };
                     }
+                }
             }
 
+            if (user != null)
+            {
+                // If the user is found and authenticated, create a new LoggedInUser record
+                var loggedInUser = new LoggedInUser
+                {
+                    UserId = user.Id,
+                    PublishedDate = DateTime.UtcNow
+
+                };
+
+                // Save the LoggedInUser record in the database
+                var insertQuery = "INSERT INTO LoggedInUser (UserId, LoginTime) VALUES (@UserId, @LoginTime)";
+                using (var insertCommand = new NpgsqlCommand(insertQuery, _connection))
+                {
+                    insertCommand.Parameters.AddWithValue("UserId", loggedInUser.UserId);
+                    insertCommand.Parameters.AddWithValue("LoginTime", loggedInUser.PublishedDate);
+                    // ... (add other parameters if necessary)
+
+                    insertCommand.ExecuteNonQuery();
+                }
+            }
+
+            _connection.Close();
             return user;
         }
+
 
 
 

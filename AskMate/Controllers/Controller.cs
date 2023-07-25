@@ -10,8 +10,8 @@ namespace AskMate.Controllers;
 public class Controller : ControllerBase
 {
 
-    //private readonly string _connectionString = "Server=localhost;Port=5432;User Id=postgres;Password=1234;Database=AskMate";
-    private readonly string _connectionString = "Server=localhost;Port=5432;User Id=postgres;Password=12345;Database=AskMate";
+    private readonly string _connectionString = "Server=localhost;Port=5432;User Id=postgres;Password=1234;Database=AskMate";
+    //private readonly string _connectionString = "Server=localhost;Port=5432;User Id=postgres;Password=12345;Database=AskMate";
 
     [HttpGet]
     public IActionResult GetAll()
@@ -81,8 +81,8 @@ public class Controller : ControllerBase
     [HttpPost("/User/Logout")]
     public IActionResult Logout()
     {
-        
-        HttpContext.Session.Clear(); 
+
+        HttpContext.Session.Clear();
 
         return Ok("Logged out successfully.");
     }
