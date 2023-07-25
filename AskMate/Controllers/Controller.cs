@@ -10,7 +10,9 @@ namespace AskMate.Controllers;
 public class Controller : ControllerBase
 {
 
-    private readonly string _connectionString = "Server=localhost;Port=5432;User Id=postgres;Password=1234;Database=AskMate";
+    //private readonly string _connectionString = "Server=localhost;Port=5432;User Id=postgres;Password=1234;Database=AskMate";
+    private readonly string _connectionString = "Server=localhost;Port=5432;User Id=postgres;Password=12345;Database=AskMate";
+
     [HttpGet]
     public IActionResult GetAll()
     {
@@ -68,12 +70,21 @@ public class Controller : ControllerBase
         return Ok(repository.CreateUser(user));
     }
 
-    [HttpPost("Login")]
+    [HttpPost("/User/Login")]
     public IActionResult Login([FromBody] User user)
     {
         var repository = new UsersRepository(new NpgsqlConnection(_connectionString));
 
         return Ok(repository.Login(user.UserName, user.Password));
+    }
+
+    [HttpPost("/User/Logout")]
+    public IActionResult Logout()
+    {
+        
+        HttpContext.Session.Clear(); 
+
+        return Ok("Logged out successfully.");
     }
 
 }

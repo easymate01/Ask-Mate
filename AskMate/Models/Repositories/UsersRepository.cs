@@ -42,40 +42,42 @@ namespace AskMate.Models.Repositories
                 return null;
             }
 
-            // Create a connection to the PostgreSQL database
-            _connection.Open();
+            User user = null;
 
             // Create the SQL query to retrieve the user from the database
-            var query = "SELECT id, username, email, password" +
-                        "FROM users " +
-                        "WHERE username = @username OR email = @usernameOrEmail";
+            var query = "SELECT id, username, email, password FROM users " +
+                        "WHERE username = @usernameOrEmail OR email = @usernameOrEmail";
 
-            using var command = new NpgsqlCommand(query, _connection);
-            command.Parameters.AddWithValue("@usernameOrEmail", usernameOrEmail);
+                _connection.Open();
 
-            using var reader = command.ExecuteReader();
+                using (var command = new NpgsqlCommand(query, _connection))
+                {
+                    command.Parameters.AddWithValue("usernameOrEmail", usernameOrEmail);
 
-            // Check if the user exists and if the password matches the stored hashed password
-            if (!reader.Read())
-            {
-                _connection.Close();
-                return null;
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            var userId = (int)reader["id"];
+                            var username = (string)reader["username"];
+                            var email = (string)reader["email"];
+                            var passwordHash = (string)reader["password"];
+
+                            // Validate the password
+                                user = new User
+                                {
+                                    Id = userId,
+                                    UserName = username,
+                                    Email = email
+                                };
+                        }
+                    }
             }
 
-            var userId = (int)reader["id"];
-            var username = (string)reader["username"];
-            var email = (string)reader["email"];
-
-            // Close the connection and return the user with the JWT token
-            _connection.Close();
-            return new User
-            {
-                Id = userId,
-                UserName = username,
-                Email = email,
-                Password = password
-            };
+            return user;
         }
+
+
 
     }
 }
