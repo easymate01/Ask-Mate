@@ -79,10 +79,14 @@ public class Controller : ControllerBase
     }
 
     [HttpPost("/User/Logout")]
-    public IActionResult Logout()
+    public IActionResult Logout([FromBody] LoggedInUser user)
     {
+        var repository = new UsersRepository(new NpgsqlConnection(_connectionString));
 
-        HttpContext.Session.Clear();
+
+        // Call the Logout method from the UserRepository
+        repository.Logout(user.UserId);
+
 
         return Ok("Logged out successfully.");
     }

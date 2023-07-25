@@ -99,6 +99,20 @@ namespace AskMate.Models.Repositories
             return user;
         }
 
+        public void Logout(int userId)
+        {
+            _connection.Open();
+
+            var deleteQuery = "DELETE FROM LoggedInUser WHERE UserId = @UserId";
+            using (var deleteCommand = new NpgsqlCommand(deleteQuery, _connection))
+            {
+                deleteCommand.Parameters.AddWithValue("UserId", userId);
+                deleteCommand.ExecuteNonQuery();
+            }
+
+            _connection.Close();
+        }
+
 
 
 
