@@ -29,12 +29,22 @@ public class Controller : ControllerBase
     }
 
     [HttpPost("/Question")]
-    public IActionResult Create(Question question)
+    public IActionResult Create(Question question, int id)
     {
         var repository = new QuestionsRepository(new NpgsqlConnection(_connectionString));
+        int lastInsertId = repository.Create(question, id);
 
-        return Ok(repository.Create(question));
+        if (lastInsertId > 0)
+        {
+            return Ok(lastInsertId);
+        }
+        else
+        {
+            // Ha a Create metódus 0-t ad vissza, az azt jelenti, hogy az id nem létezik a loggedinuser táblában.
+            return BadRequest("A megadott id nem található a loggedinuser táblában.");
+        }
     }
+
 
     [HttpPost("/Answer")]
     public IActionResult Addanswer(Answer answer)

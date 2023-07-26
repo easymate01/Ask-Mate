@@ -100,26 +100,44 @@ namespace AskMate.Models.Repositories
             }
         }
 
-        public int Create(Question question)
+
+        public int Create(Question question, int id)
         {
             _connection.Open();
-            int lastInsertId;
+            int lastInsertId = 0;
 
-            using (var cmd = new NpgsqlCommand(
-                       "INSERT INTO questions (title, description) VALUES (@title, @description) RETURNING id",
-                       _connection
-                   ))
+            using (var cmd = new NpgsqlCommand("SELECT COUNT(userid) FROM loggedinuser WHERE userid = @id", _connection))
             {
-                cmd.Parameters.AddWithValue("title", question.Title);
-                cmd.Parameters.AddWithValue("description", question.Description);
+                cmd.Parameters.AddWithValue("id", id);
+                int userCount = Convert.ToInt32(cmd.ExecuteScalar());
 
-                lastInsertId = (int)cmd.ExecuteScalar();
+                if (userCount > 0)
+                {
+                    // The user with the given id exists in the loggedinuser table.
+                    using (var cmdInsertQuestion = new NpgsqlCommand("INSERT INTO questions (title, description) VALUES (@title, @description) RETURNING id", _connection))
+                    {
+                        cmdInsertQuestion.Parameters.AddWithValue("title", question.Title);
+                        cmdInsertQuestion.Parameters.AddWithValue("description", question.Description);
+
+                        lastInsertId = Convert.ToInt32(cmdInsertQuestion.ExecuteScalar());
+                    }
+                }
+                else
+                {
+                    // The user with the given id does not exist in the loggedinuser table.
+                    Console.WriteLine("A megadott id nem található a loggedinuser táblában.");
+                }
             }
 
             _connection.Close();
 
             return lastInsertId;
         }
+
+
+
+
+
 
         public void Delete(int id)
         {
