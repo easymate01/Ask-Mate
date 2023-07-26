@@ -114,13 +114,16 @@ namespace AskMate.Models.Repositories
                 if (userCount > 0)
                 {
                     // The user with the given id exists in the loggedinuser table.
-                    using (var cmdInsertQuestion = new NpgsqlCommand("INSERT INTO questions (title, description) VALUES (@title, @description) RETURNING id", _connection))
+                    using (var cmdInsertQuestion = new NpgsqlCommand("INSERT INTO questions (title, description, userId) VALUES (@title, @description, @id) RETURNING id", _connection))
                     {
                         cmdInsertQuestion.Parameters.AddWithValue("title", question.Title);
                         cmdInsertQuestion.Parameters.AddWithValue("description", question.Description);
+                        cmdInsertQuestion.Parameters.AddWithValue("id", id);
+
 
                         lastInsertId = Convert.ToInt32(cmdInsertQuestion.ExecuteScalar());
                     }
+
                 }
                 else
                 {

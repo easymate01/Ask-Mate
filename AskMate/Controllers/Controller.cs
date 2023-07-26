@@ -119,4 +119,23 @@ public class Controller : ControllerBase
     }
 
 
+    [HttpPatch("/Answer/Accept/{answerId}")]
+    public IActionResult AcceptAnswer(int userId, int questionId)
+    {
+        var repository = new AnswersRepository(new NpgsqlConnection(_connectionString));
+        bool affectedRows = repository.AcceptAnswer(userId, questionId);
+
+        if (affectedRows)
+        {
+            return Ok("Answer accepted successfully.");
+        }
+        else
+        {
+            // If the AcceptAnswer method returns 0, it means that the specified ID does not exist in the loggedinuser table.
+            return BadRequest("The provided user ID was not found in the loggedinuser table.");
+        }
+    }
+
+
+
 }
