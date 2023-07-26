@@ -11,28 +11,42 @@ namespace AskMate.Models.Repositories
             _connection = connection;
         }
 
-        public int AddAnswer(Answer answer)
+        public int Create(Answer answer, int id)
         {
             _connection.Open();
+            int newAnswerId = 0;
 
-            int newAnswerId;
+            using (var command = new NpgsqlCommand("SELECT COUNT(userid) FROM loggedinuser WHERE userid = @id", _connection))
+            {
+                command.Parameters.AddWithValue("id", id);
+                int userCount = Convert.ToInt32(command.ExecuteScalar());
 
-            using (var cmd = new NpgsqlCommand(
+                if (userCount > 0)
+                {
+                    // The user with the given id exists in the loggedinuser table.
+                    using (var cmd = new NpgsqlCommand(
                        "INSERT INTO answers (message, question_id, submission_time) VALUES (@message, @questionId, @submissionTime) RETURNING id",
                        _connection
                    ))
-            {
-                cmd.Parameters.AddWithValue("message", answer.Message);
-                cmd.Parameters.AddWithValue("questionId", answer.Question_Id);
-                cmd.Parameters.AddWithValue("submissionTime", answer.PublishedDate);
+                    {
+                        cmd.Parameters.AddWithValue("message", answer.Message);
+                        cmd.Parameters.AddWithValue("questionId", answer.Question_Id);
+                        cmd.Parameters.AddWithValue("submissionTime", answer.PublishedDate);
 
-                newAnswerId = (int)cmd.ExecuteScalar();
+                        newAnswerId = (int)cmd.ExecuteScalar();
+                    }
+                }
+                else
+                {
+                    // The user with the given id does not exist in the loggedinuser table.
+                    Console.WriteLine("A megadott id nem található a loggedinuser táblában.");
+                }
             }
-
             _connection.Close();
-
             return newAnswerId;
         }
+
+
 
         public void Delete(int id)
         {

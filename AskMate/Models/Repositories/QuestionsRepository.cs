@@ -134,11 +134,6 @@ namespace AskMate.Models.Repositories
             return lastInsertId;
         }
 
-
-
-
-
-
         public void Delete(int id)
         {
             _connection.Open();
