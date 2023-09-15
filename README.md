@@ -1,6 +1,6 @@
 # AskMate
 
-## Story
+## Story:
 
 It is time to put your newly acquired ASP.NET skills to use.
 Your next big task is to implement a crowdsourced Q&A site, similar to Stack Overflow.
